@@ -1,3 +1,5 @@
+library(MASS)
+
 dat_it <- read.csv(file="it_data.csv")
 dat_hr<-read.csv(file='hr_data.csv')
 dat_fm<-read.csv(file='fm_data.csv')
