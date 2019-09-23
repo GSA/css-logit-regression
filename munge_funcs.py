@@ -15,8 +15,45 @@ import numpy as np
 
 def df_clean (df,cat_cols,target_col):
     
+    fm_cols = ['Benefits Management Importance', 'Benefits Management Satisfaction',
+       'Bill Collection Services Importance',
+       'Bill Collection Services Satisfaction', 'Bill Payment Importance',
+       'Bill Payment Support Satisfaction', 'Budget Execution Importance',
+       'Budget Execution Support Satisfaction',
+       'Budget Formulation Importance', 'Budget Formulation Satisfaction','Financial Management Information Satisfaction',
+       'Financial Management Information and Analysis Importance','Financial Management Strategic Partner Satisfaction',
+       'Financial Management System',
+       'Financial Risk Management Services Importance',
+       'Financial Risk Management Services Satisfaction']
+    
+    acq_cols = ['Contract Administration Services Importance',
+       'Contract Administration Services Satisfaction','Contracting Function Partner Satisfaction',
+       'Contracting Function Systems Satisfaction','Pre-Award Services Importance', 'Pre-Award Services Satisfaction',
+       'Purchase Card Management Services Importance',
+       'Purchase Card Management Services Satisfaction']
+
+    it_cols =  ['IT Comms Importance', 'IT Comms Satisfaction',
+       'IT Equipment Importance', 'IT Equipment Satisfaction', 'IT Function Strategic Partner',
+       'IT Function System Satisfaction', 'IT Support Importance',
+       'IT Support Satisfaction','DM&E Importance',
+       'DM&E Satisfaction','O&M Importance',
+       'O&M Satisfaction']
+
+    hr_cols = ['Recruiting and Hiring Services Importance',
+       'Recruiting and Hiring Services Satisfaction',
+       'Reporting Responsibilities Awareness','Human Capital System','Human Capital Strategic Partner',
+       'Time and Attendance Management Importance',
+       'Time and Attendance Management Satisfaction','Worklife Support Services Importance',
+       'Worklife Support Services Satisfaction','Workforce and Succession Planning Importance',
+       'Workforce and Succession Planning Satisfaction','Training and Development Services Importance',
+       'Training and Development Services Satisfaction','Retirement Planning and Processing Importance',
+       'Retirement Planning and Processing Satisfaction','Employee Relations Services Importance',
+       'Employee Relations Services Satisfaction','Labor Relations Services Importance',
+       'Labor Relations Services Satisfaction']
+    
     service_area_cols = ['Financial Management Satisfaction','Human Capital Satisfaction','IT Function Satisfaction',
                          'Contracting Function Quality of Support Satisfaction']
+    
     drop_target_cols = [x for x in service_area_cols if x != target_col]
     one_hot = pd.get_dummies(df[cat_cols],drop_first=True)
     df_new = df.join(one_hot)
@@ -29,9 +66,25 @@ def df_clean (df,cat_cols,target_col):
     else:
         pass
     
+    if target_col == 'Financial Management Satisfaction':
+        df_new.drop(columns=acq_cols+it_cols+hr_cols,inplace=True)
+        
+    elif target_col == 'Human Capital Satisfaction':
+        df_new.drop(columns=fm_cols+acq_cols+it_cols,inplace=True)
+        
+    elif target_col == 'IT Function Satisfaction':
+        df_new.drop(columns=fm_cols+acq_cols+hr_cols,inplace=True)
+        
+    elif target_col == 'Contracting Function Quality of Support Satisfaction':
+        df_new.drop(columns=fm_cols+it_cols+hr_cols,inplace=True)
+        
+    else:
+        pass
+    
     df_new['YRSAGENCY2']=df_new['YRSAGENCY2'].astype(float).astype(int)
     df_new['intercept']=1
-    df_new= df_new[df_new[target_col].isna()==False]
+    #df_new= df_new[df_new[target_col].isna()==False]
+    df_new.dropna(axis=0,how='any',inplace=True)
     df_new=df_new.astype(int)
     
     return df_new     
@@ -50,48 +103,13 @@ def import_data():
     df_wide = pd.DataFrame(table).reset_index()
     
     # drop columns of survey responses we will not be using
-
-    df_wide.drop(columns =['Benefits Management Importance', 'Benefits Management Satisfaction',
-       'Bill Collection Services Importance',
-       'Bill Collection Services Satisfaction', 'Bill Payment Importance',
-       'Bill Payment Support Satisfaction', 'Budget Execution Importance',
-       'Budget Execution Support Satisfaction',
-       'Budget Formulation Importance', 'Budget Formulation Satisfaction','Contract Administration Services Importance',
-       'Contract Administration Services Satisfaction','Contracting Function Partner Satisfaction',
-       'Contracting Function Systems Satisfaction', 'DM&E Importance',
-       'DM&E Satisfaction', 'Employee Relations Services Importance',
-       'Employee Relations Services Satisfaction',
-       'Federal Government Vet Process Satisfaction','Financial Management Information Satisfaction',
-       'Financial Management Information and Analysis Importance','Financial Management Strategic Partner Satisfaction',
-       'Financial Management System',
-       'Financial Risk Management Services Importance',
-       'Financial Risk Management Services Satisfaction','Human Capital Strategic Partner',
-       'Human Capital System', 'IT Comms Importance', 'IT Comms Satisfaction',
-       'IT Equipment Importance', 'IT Equipment Satisfaction', 'IT Function Strategic Partner',
-       'IT Function System Satisfaction', 'IT Support Importance',
-       'IT Support Satisfaction',
+                    
+    df_wide.drop(columns =[ 
+       'Federal Government Vet Process Satisfaction',
        'Insider Threats and Workplace Violence Confidentiality',
-       'Labor Relations Services Importance',
-       'Labor Relations Services Satisfaction', 'O&M Importance',
-       'O&M Satisfaction', 'Performance and Recognition Management Importance',
+        'Performance and Recognition Management Importance',
        'Performance and Recognition Management Satisfaction',
-       'Pre-Award Services Importance', 'Pre-Award Services Satisfaction',
-       'Purchase Card Management Services Importance',
-       'Purchase Card Management Services Satisfaction',
-       'Recruiting and Hiring Services Importance',
-       'Recruiting and Hiring Services Satisfaction',
-       'Reporting Responsibilities Awareness',
-       'Retirement Planning and Processing Importance',
-       'Retirement Planning and Processing Satisfaction',
        'Security of Data Systems Trust', 'Supervisory Status',
-       'Time and Attendance Management Importance',
-       'Time and Attendance Management Satisfaction',
-       'Training and Development Services Importance',
-       'Training and Development Services Satisfaction',
-       'Workforce and Succession Planning Importance',
-       'Workforce and Succession Planning Satisfaction',
-       'Worklife Support Services Importance',
-       'Worklife Support Services Satisfaction',
         'OCCUPATION','surveyfeedbacksurveyfeedbacknumb','GRADE','WORK_LOCATION','FED_YRS'],inplace=True )
     
     return df_wide
